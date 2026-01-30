@@ -1,0 +1,15 @@
+- name: Deploy media-streaming-app
+  hosts: localhost
+  tasks:
+    - name: Stop old container
+      docker_container:
+        name: media-app
+        state: absent
+
+    - name: Run new container
+      docker_container:
+        name: media-app
+        image: abdurrahman72/media-streaming-app:latest
+        state: started
+        ports:
+          - "80:80"
