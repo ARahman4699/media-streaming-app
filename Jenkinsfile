@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    environment {
+        DOCKER_IMAGE = "rahman4699/media-streaming-app:${BUILD_NUMBER}"
+    }
+
     stages {
         stage('Checkout Code') {
             steps {
@@ -10,18 +14,13 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t media-streaming-app:${BUILD_NUMBER} .'
+                sh 'docker build -t $DOCKER_IMAGE .'
             }
         }
 
-        stage('Run Docker Container (Test)') {
+        stage('Push Docker Image') {
             steps {
-                sh '''
-                docker stop media-test || true
-                docker rm media-test || true
-                docker run -d --name media-test -p 8081:80 media-streaming-app:${BUILD_NUMBER}
-                docker ps | head -5
-                '''
+                sh 'docker push $DOCKER_IMAGE'
             }
         }
     }
