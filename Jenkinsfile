@@ -1,50 +1,15 @@
-pipeline {
-    agent any
-
-    environment {
-        DOCKER_IMAGE = "abdurrahman72/media-streaming-app:${BUILD_NUMBER}"
+stage('Build Docker Image') {
+    steps {
+        // Build image with BUILD_NUMBER AND latest tag
+        sh 'docker build -t abdurrahman72/media-streaming-app:${BUILD_NUMBER} -t abdurrahman72/media-streaming-app:latest .'
     }
+}
 
-    stages {
-
-        stage('Checkout Code') {
-            steps {
-                // Pull code from GitHub
-                checkout scm
-            }
-        }
-
-        stage('Build Docker Image') {
-            steps {
-                // Build Docker image with current build number
-                sh 'docker build -t $DOCKER_IMAGE .'
-            }
-        }
-
-        stage('Push Docker Image') {
-            steps {
-                // Push image to Docker Hub
-                sh 'docker push $DOCKER_IMAGE'
-            }
-        }
-
-        stage('Deploy') {
-            steps {
-                // Run Ansible playbook to deploy container
-                sh 'ansible-playbook deploy.yml'
-            }
-        }
-
-    } // closes stages
-
-    post {
-        success {
-            echo "Pipeline completed successfully! 🚀"
-        }
-        failure {
-            echo "Pipeline failed! Check logs for errors ❌"
-        }
+stage('Push Docker Image') {
+    steps {
+        // Push both BUILD_NUMBER tag AND latest tag to Docker Hub
+        sh 'docker push abdurrahman72/media-streaming-app:${BUILD_NUMBER}'
+        sh 'docker push abdurrahman72/media-streaming-app:latest'
     }
-
-} // closes pipeline
+}
 
