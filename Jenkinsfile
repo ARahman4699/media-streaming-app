@@ -4,21 +4,26 @@ pipeline {
     stages {
         stage('Checkout Code') {
             steps {
-                git branch: 'main',
-                    url: 'https://github.com/ARahman4699/media-streaming-app.git'
+                checkout scm
             }
         }
 
-        stage('Build App') {
+        stage('Build Docker Image') {
             steps {
-                echo "Building application..."
+                sh 'docker build -t media-streaming-app:${BUILD_NUMBER} .'
             }
         }
 
-        stage('Test App') {
+        stage('Run Docker Container (Test)') {
             steps {
-                echo "Running basic tests..."
+                sh '''
+                docker stop media-test || true
+                docker rm media-test || true
+                docker run -d --name media-test -p 8081:80 media-streaming-app:${BUILD_NUMBER}
+                docker ps | head -5
+                '''
             }
         }
     }
 }
+
